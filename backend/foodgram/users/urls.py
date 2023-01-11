@@ -1,13 +1,9 @@
-from django.urls import path, include
+from django.urls import include, path
 
 from users.views import get_jwt_token
 
-auth_path = [
-    path('token/login/', get_jwt_token, name='get_token'),
-]
-
 urlpatterns = [
-    path('auth/', include(auth_path)),
     path('', include('djoser.urls')),
-    path('', include('djoser.urls.jwt')),
+    path('auth/token/', get_jwt_token, name='get_token'),
+    path('auth/', include('djoser.urls.authtoken')),
 ]

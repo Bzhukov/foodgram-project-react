@@ -25,4 +25,3 @@ class User(AbstractUser):
                 name="username_is_not_me"
             )
         ]
-
