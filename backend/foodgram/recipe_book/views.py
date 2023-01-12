@@ -5,7 +5,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 from recipe_book.models import Recipe, Tag, Ingredient
-from recipe_book.permission import IsAdminOrReadOnly
+from recipe_book.permission import IsAuthorOrReadOnly
 from recipe_book.serializers import (RecipeSerializer, TagSerializer,
                                      IngredientSerializers)
 
@@ -17,7 +17,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     """
     queryset = Recipe.objects.all()
     pagination_class = PageNumberPagination
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAuthorOrReadOnly,)
     serializer_class = RecipeSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('author', 'name',)
@@ -27,6 +27,9 @@ class RecipesViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(queryset, pk=pk)
         serializer = RecipeSerializer(recipe)
         return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -54,7 +57,6 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Ingredient.objects.all()
     permission_classes = (permissions.AllowAny,)
-    pagination_class = PageNumberPagination
     serializer_class = IngredientSerializers
     search_fields = ('name',)
 

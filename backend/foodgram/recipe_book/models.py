@@ -37,7 +37,6 @@ UNITS = (
 )
 
 
-
 def directory_path(instance, filename):
     """Функция определяющая путь к сохраняемому файлу"""
     return f'reciepts/{instance.name}/{filename}'
@@ -83,13 +82,13 @@ class Recipe(models.Model):
     image = models.ImageField(
         upload_to=directory_path,
         null=True,
-        default=None
+        default=None,
     )
     text = models.CharField(max_length=500,
-                                   null=True,
-                                   blank=True,
-                                   verbose_name='Краткое описание рецепта '
-                                                '(макс 500 символов)')
+                            null=True,
+                            blank=True,
+                            verbose_name='Краткое описание рецепта '
+                                         '(макс 500 символов)')
     ingredients = models.ManyToManyField(
         Ingredient,
         related_name='reciepe',
@@ -100,7 +99,7 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(Tag)
     cooking_time = models.PositiveIntegerField(
-        verbose_name="Время приготовления в минутах")
+        verbose_name="Время приготовления в минутах", )
 
     class Meta:
         ordering = ('cooking_time',)
@@ -126,4 +125,3 @@ class Structure(models.Model):
 
     def __str__(self):
         return self.recipe.name[:15]
-

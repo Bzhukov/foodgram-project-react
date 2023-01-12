@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 from pathlib import Path
 
@@ -102,3 +103,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 5,
 }
 
+STATIC_URL = '/static/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
