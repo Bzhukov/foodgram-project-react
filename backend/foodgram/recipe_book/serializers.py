@@ -65,3 +65,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'tags', 'author', 'ingredients','name','image', 'text', 'cooking_time')
         model = Recipe
         lookup_field = 'name'
+
+class IngredientSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Ingredient
+        fields = ('__all__')

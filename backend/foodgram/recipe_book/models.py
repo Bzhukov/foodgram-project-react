@@ -3,7 +3,7 @@ from django.db import models
 
 User = get_user_model()
 
-UNITS = [
+UNITS = (
     ('g', 'г'),
     ('glass', 'стакан'),
     ('as_your_taste', 'по вкусу'),
@@ -16,7 +16,7 @@ UNITS = [
     ('pinch', 'щепотка'),
     ('handful', 'горсть'),
     ('piece', 'кусок'),
-    ('ru', 'кг'),
+    ('kg', 'кг'),
     ('package', 'пакет'),
     ('bundle', 'пучок'),
     ('slice', 'долька'),
@@ -34,8 +34,8 @@ UNITS = [
     ('bag', 'пакетик'),
     ('leaf', 'лист'),
     ('stem', 'стебель'),
+)
 
-]
 
 
 def directory_path(instance, filename):
