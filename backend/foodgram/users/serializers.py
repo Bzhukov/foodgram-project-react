@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from djoser.serializers import UserSerializer
 from rest_framework import serializers
 
+
+
 User = get_user_model()
 
 
@@ -19,3 +21,4 @@ class GetTokenSerializer(serializers.ModelSerializer):
         fields = (
             'email', 'password'
         )
+

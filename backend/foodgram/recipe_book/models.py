@@ -76,7 +76,7 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     """Рецепт."""
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, related_name='recipes', on_delete=models.CASCADE)
     name = models.CharField(max_length=200, unique=True,
                             verbose_name='Название')
     image = models.ImageField(
@@ -125,3 +125,31 @@ class Structure(models.Model):
 
     def __str__(self):
         return self.recipe.name[:15]
+
+class Subscription(models.Model):
+    """Подписки."""
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='subscriber',
+        verbose_name='Подписчик',
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='subscribed',
+        verbose_name='Автор'
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'],
+                name='unique_subscription'
+            )
+        ]
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+
+    def __str__(self):
+        return f'{self.user.first_name} {self.user.last_name}'

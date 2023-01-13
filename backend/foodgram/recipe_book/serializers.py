@@ -1,10 +1,11 @@
 import base64
+
 import webcolors
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
-from recipe_book.models import Recipe, Tag, Ingredient
+from recipe_book.models import Recipe, Tag, Ingredient, Subscription
 
 User = get_user_model()
 
@@ -79,3 +80,30 @@ class IngredientSerializers(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
         fields = ('__all__')
+
+
+class SubscriptionSerializers(serializers.ModelSerializer):
+    email = serializers.EmailField(source='author.email', read_only=True)
+    id = serializers.PrimaryKeyRelatedField(source='author', read_only=True)
+    username = serializers.CharField(source='author.username', read_only=True)
+    first_name = serializers.CharField(source='author.first_name',
+                                       read_only=True)
+    last_name = serializers.CharField(source='author.last_name',
+                                      read_only=True)
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Subscription
+        fields = (
+            'email', 'id', 'username', 'first_name', 'last_name', 'recipes',
+            'recipes_count')
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        recipes = obj.author.recipes
+        context = {'request': request}
+        return RecipeSerializer(recipes, context=context, many=True).data
+
+    def get_recipes_count(self, obj):
+        return obj.author.recipes.count()

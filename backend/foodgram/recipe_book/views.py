@@ -4,10 +4,11 @@ from rest_framework import permissions
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
-from recipe_book.models import Recipe, Tag, Ingredient
+from recipe_book.models import Recipe, Tag, Ingredient, Subscription
 from recipe_book.permission import IsAuthorOrReadOnly
 from recipe_book.serializers import (RecipeSerializer, TagSerializer,
-                                     IngredientSerializers)
+                                     IngredientSerializers,
+                                     SubscriptionSerializers, )
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
@@ -62,6 +63,18 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
 
     def retrieve(self, request, pk=None):
         queryset = Ingredient.objects.all()
-        ingredient= get_object_or_404(queryset, pk=pk)
+        ingredient = get_object_or_404(queryset, pk=pk)
         serializer = IngredientSerializers(ingredient)
         return Response(serializer.data)
+
+
+class SubscriptionsViewSet(viewsets.ModelViewSet):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializers
+    permissions = (IsAuthorOrReadOnly,)
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        subscriptions = Subscription.objects.select_related().filter(
+            user=self.request.user)
+        return subscriptions.all()
