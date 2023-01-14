@@ -27,9 +27,7 @@ class Base64ImageField(serializers.ImageField):
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
             ext = format.split('/')[-1]
-
             data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-
         return super().to_internal_value(data)
 
 
@@ -103,12 +101,6 @@ class SubscriptionSerializers(serializers.ModelSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
-    class Meta:
-        model = Subscription
-        fields = (
-            'email', 'id', 'username', 'first_name', 'last_name', 'recipes',
-            'recipes_count')
-
     def get_recipes(self, obj):
         request = self.context.get('request')
         recipes = obj.author.recipes
@@ -117,3 +109,11 @@ class SubscriptionSerializers(serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return obj.author.recipes.count()
+
+    class Meta:
+        model = Subscription
+        fields = (
+            'email', 'id', 'username', 'first_name', 'last_name', 'recipes',
+            'recipes_count')
+
+

@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
 from users.serializers import GetTokenSerializer
@@ -15,7 +16,7 @@ class CustomAuthToken(ObtainAuthToken):
     Получение токена в обмен на email и password.
     Права доступа: Доступно без токена.
     """
-
+    filter_backends = (LimitOffsetPagination ,)
     def post(self, request, *args, **kwargs):
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
