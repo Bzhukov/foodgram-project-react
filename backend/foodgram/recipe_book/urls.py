@@ -5,10 +5,11 @@ from recipe_book.views import (RecipesViewSet, TagsViewSet, IngredientsViewSet,
                                SubscriptionsViewSet)
 
 v1_router = DefaultRouter()
-v1_router.register(r'recipes', RecipesViewSet)
-v1_router.register(r'tags', TagsViewSet)
-v1_router.register(r'ingredients', IngredientsViewSet)
-v1_router.register(r'subscriptions', SubscriptionsViewSet)
+v1_router.register('recipes', RecipesViewSet)
+v1_router.register('tags', TagsViewSet)
+v1_router.register('ingredients', IngredientsViewSet)
+v1_router.register('users/subscriptions', SubscriptionsViewSet,
+                   basename='subscription')
 
 urlpatterns = [
     path('', include(v1_router.urls)),
