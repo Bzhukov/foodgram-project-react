@@ -44,8 +44,8 @@ def directory_path(instance, filename):
 
 class Tag(models.Model):
     """Теги."""
-    name = models.CharField(max_length=30, verbose_name='Тег')
-    color = models.CharField(max_length=16)
+    name = models.CharField(max_length=30, verbose_name='Тег', unique=True)
+    color = models.CharField(max_length=16, unique=True, verbose_name='Цвет')
     slug = models.SlugField(unique=True, verbose_name='Адрес')
 
     class Meta:
