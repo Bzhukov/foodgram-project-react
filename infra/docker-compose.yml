@@ -11,9 +11,8 @@ services:
       - /var/lib/postgresql/data/
     env_file:
       - ./.env
-
   backend:
-    image: kelpyre/foodgram-backend:latest
+    image: ozzomad/web:practicum
     restart: always
     volumes:
       - static_value:/app/static/
@@ -21,7 +20,7 @@ services:
     depends_on:
       - db
     env_file:
-      - ./.env
+      - .env
 
   frontend:
     build:
