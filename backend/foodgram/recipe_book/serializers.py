@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
-from recipe_book.models import Recipe, Tag, Ingredient, Subscription
+from recipe_book.models import Recipe, Tag, Ingredient, Subscription, Favorite
 
 User = get_user_model()
 
@@ -61,12 +61,22 @@ class RecipeSerializer(serializers.ModelSerializer):
     author = AuthorSerializer(read_only=True, many=False)
     ingredients = IngredientSerializer(read_only=True, many=True)
     image = Base64ImageField(required=True, allow_null=False)
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
+
+    def get_is_favorited(self, obj):
+        request = self.context.get('request')
+        user = request.user
+        return Favorite.objects.filter(recipe=obj, user=user).exists()
+
+    def get_is_in_shopping_cart(self, obj):
+        return True
 
     class Meta:
         model = Recipe
         fields = (
-            'id', 'tags', 'author', 'ingredients', 'name', 'image', 'text',
-            'cooking_time')
+            'id', 'tags', 'author', 'ingredients', 'is_favorited',
+            'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time')
         read_only_fields = ('author', 'ingredients', 'tags',)
         lookup_field = 'name'
 
