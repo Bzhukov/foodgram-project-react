@@ -4,7 +4,7 @@ from rest_framework import filters, viewsets, status
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.pagination import (PageNumberPagination,
-    LimitOffsetPagination)
+                                       LimitOffsetPagination)
 from rest_framework.response import Response
 
 from recipe_book.filters import IngredientFilter, RecipeFilter
@@ -23,11 +23,11 @@ class RecipesViewSet(viewsets.ModelViewSet):
     Права доступа: Администратор или только чтение.
     """
     queryset = Recipe.objects.all()
-    #pagination_class = PageNumberPagination
+    # pagination_class = PageNumberPagination
     permission_classes = (IsAuthorOrReadOnly,)
     serializer_class = RecipeSerializer
     filter_backends = (filters.SearchFilter,)
-    #filter_backends = (DjangoFilterBackend,)
+    # filter_backends = (DjangoFilterBackend,)
     search_fields = ('author', 'name',)
 
     def retrieve(self, request, pk=None):
@@ -87,12 +87,13 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
             user=self.request.user)
         return subscriptions.all()
 
-    # @action(
-    #     detail=True,
-    #     methods=['POST', 'DELETE'],
-    #     permission_classes=(permissions.IsAuthenticated,)
-    # )
-    #def subscribe(self, request, user_id):
+    @action(
+        detail=True,
+        methods=['POST'],
+        permission_classes=(permissions.IsAuthenticated,),
+    )
+    def subscribe(self):
+        return Response(status=status.HTTP_204_NO_CONTENT)
         # print('111', user_id)
         # user = self.request.user
         # author = get_object_or_404(User, pk=user_id)
@@ -106,6 +107,7 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
         # )
         # serializer.is_valid(raise_exception=True)
         # if request.method == 'POST':
+        #     print('222', user_id)
         #     Subscription.objects.create(user=user, author=author)
         #     serializer = SubscriptionSerializers(
         #         author,
@@ -131,7 +133,13 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
     #     return self.get_paginated_response(serializer.data)
     #
 
-    def list(self, request):
+    @action(
+        detail=True,
+        methods=['GET'],
+        permission_classes=(permissions.IsAuthenticated,)
+    )
+    def subscriptions(self, request):
+        print('333')
         subscriptions = Subscription.objects.select_related().filter(
             user=self.request.user)
         serializer = SubscriptionSerializers(subscriptions,

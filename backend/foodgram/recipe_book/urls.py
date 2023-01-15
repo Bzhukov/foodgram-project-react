@@ -9,7 +9,7 @@ v1_router.register('recipes', RecipesViewSet)
 v1_router.register('tags', TagsViewSet)
 v1_router.register('ingredients', IngredientsViewSet)
 v1_router.register('users/subscriptions', SubscriptionsViewSet,
-                   basename='subscription')
+                   basename='subscriptions')
 v1_router.register(r'users/(?P<user_id>[\d]+)/subscribe', SubscriptionsViewSet,
                    basename='subscribe')
 
