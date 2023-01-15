@@ -117,3 +117,41 @@ class SubscriptionSerializers(serializers.ModelSerializer):
             'recipes_count')
 
 
+class SubscriptionSerializers2(serializers.ModelSerializer):
+    """Сериализатор подписки пользователя."""
+    class Meta:
+        model = Subscription
+        fields = ('user_id', 'author_id')
+
+
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        recipes = obj.author.recipes
+        context = {'request': request}
+        return RecipeSerializer(recipes, context=context, many=True).data
+
+    def validate(self, data):
+        request = self.context.get('request')
+        current_user = request.user
+        print(self.initial_data)
+        author = self.initial_data['author']
+        in_subscribed = Subscription.objects.filter(
+            user=current_user,
+            author=author
+        )
+        if request.method == 'POST':
+            if in_subscribed.exists():
+                raise serializers.ValidationError({
+                    'errors': 'Вы уже подписаны на этого автора.'
+                })
+            if author == current_user:
+                raise serializers.ValidationError({
+                    'errors': 'Нельзя подписаться на себя.'
+                })
+        if request.method == 'DELETE':
+            if not in_subscribed.exists():
+                raise serializers.ValidationError({
+                    'errors': 'Вы не подписаны на этого автора.'
+                })
+        return

@@ -12,7 +12,8 @@ from recipe_book.models import Recipe, Tag, Ingredient, Subscription
 from recipe_book.permission import IsAuthorOrReadOnly
 from recipe_book.serializers import (RecipeSerializer, TagSerializer,
                                      IngredientSerializers,
-                                     SubscriptionSerializers, )
+                                     SubscriptionSerializers,
+                                     SubscriptionSerializers2, )
 
 User = get_user_model()
 
@@ -92,7 +93,7 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
         methods=['POST'],
         permission_classes=(permissions.IsAuthenticated,),
     )
-    def subscribe(self):
+    def subscribe(self, request):
         return Response(status=status.HTTP_204_NO_CONTENT)
         # print('111', user_id)
         # user = self.request.user
@@ -146,3 +147,15 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
                                              context={'request': request},
                                              many=True)
         return Response(serializer.data)
+
+class SubscriptionsViewSet2(viewsets.ModelViewSet):
+    serializer_class = SubscriptionSerializers2
+
+    @action(
+        detail=True,
+        methods=['POST'],
+        permission_classes=(permissions.IsAuthenticated,),
+    )
+    def subscribe(self, request, pk):
+        print(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
