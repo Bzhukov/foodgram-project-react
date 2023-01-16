@@ -1,10 +1,10 @@
 from django.contrib.auth import get_user_model
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, viewsets, status
 from rest_framework import permissions
-from rest_framework.decorators import action
-from rest_framework.pagination import (PageNumberPagination,
-                                       LimitOffsetPagination)
+from rest_framework.exceptions import ValidationError
+from rest_framework.pagination import (LimitOffsetPagination)
 from rest_framework.response import Response
 
 from recipe_book.filters import IngredientFilter, RecipeFilter
@@ -13,7 +13,7 @@ from recipe_book.permission import IsAuthorOrReadOnly
 from recipe_book.serializers import (RecipeSerializer, TagSerializer,
                                      IngredientSerializers,
                                      SubscriptionSerializers,
-                                     SubscriptionSerializers2, )
+                                     )
 
 User = get_user_model()
 
@@ -81,81 +81,31 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
 
 class SubscriptionsViewSet(viewsets.ModelViewSet):
     serializer_class = SubscriptionSerializers
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
-        subscriptions = Subscription.objects.select_related().filter(
+        return Subscription.objects.select_related().filter(
             user=self.request.user)
-        return subscriptions.all()
 
-    @action(
-        detail=True,
-        methods=['POST'],
-        permission_classes=(permissions.IsAuthenticated,),
-    )
-    def subscribe(self, request):
-        return Response(status=status.HTTP_204_NO_CONTENT)
-        # print('111', user_id)
-        # user = self.request.user
-        # author = get_object_or_404(User, pk=user_id)
-        # is_subscribed = get_object_or_404(Subscription, user=user,
-        #                                   author=author)
-        # data = {'user': user, 'author': author}
-        # serializer = SubscriptionSerializers(
-        #     data=data,
-        #     context={'request': request},
-        #     partial=True
-        # )
-        # serializer.is_valid(raise_exception=True)
-        # if request.method == 'POST':
-        #     print('222', user_id)
-        #     Subscription.objects.create(user=user, author=author)
-        #     serializer = SubscriptionSerializers(
-        #         author,
-        #         context={'request': request}
-        #     )
-        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
-        # if request.method == 'DELETE':
-        #     is_subscribed.delete()
-        #     return Response(status=status.HTTP_204_NO_CONTENT)
-
-    # @action(
-    #     detail=True,
-    #     methods=['GET'],
-    #     permission_classes=(permissions.IsAuthenticated,)
-    # )
-    # def subscriptions(self, request):
-    #     print('111')
-    #     user = self.request.user
-    #     serializer = SubscriptionSerializers(
-    #         user,
-    #         context={'request': request}
-    #     )
-    #     return self.get_paginated_response(serializer.data)
-    #
-
-    @action(
-        detail=True,
-        methods=['GET'],
-        permission_classes=(permissions.IsAuthenticated,)
-    )
-    def subscriptions(self, request):
-        print('333')
-        subscriptions = Subscription.objects.select_related().filter(
-            user=self.request.user)
-        serializer = SubscriptionSerializers(subscriptions,
-                                             context={'request': request},
-                                             many=True)
+    def list(self, request):
+        serializer = SubscriptionSerializers(self.queryset, many=True)
         return Response(serializer.data)
 
-class SubscriptionsViewSet2(viewsets.ModelViewSet):
-    serializer_class = SubscriptionSerializers2
+    def perform_create(self, serializer):
+        author_id = self.kwargs.get('author_id')
+        user_id = self.request.user.id
+        queryset = Subscription.objects.filter(
+            author_id=author_id,
+            user_id=user_id)
+        if queryset.exists():
+            raise ValidationError('Вы уже подписаны на данного автора')
+        serializer.save(user_id=user_id, author_id=author_id)
 
-    @action(
-        detail=True,
-        methods=['POST'],
-        permission_classes=(permissions.IsAuthenticated,),
-    )
-    def subscribe(self, request, pk):
-        print(pk)
+    def delete(self, request, author_id):
+        try:
+            instance = get_object_or_404(Subscription,
+                                         user_id=request.user.id,
+                                         author_id=author_id)
+            self.perform_destroy(instance)
+        except Http404:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
