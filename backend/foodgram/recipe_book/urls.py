@@ -14,6 +14,7 @@ v1_router.register(r'users/(?P<author_id>[\d]+)/subscribe', SubscriptionsViewSet
                    basename='subscribe')
 
 
+
 urlpatterns = [
     path('', include(v1_router.urls)),
 ]

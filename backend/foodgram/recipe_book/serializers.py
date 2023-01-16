@@ -119,11 +119,10 @@ class SubscriptionSerializers(serializers.ModelSerializer):
 
 class SubscriptionSerializers2(serializers.ModelSerializer):
     """Сериализатор подписки пользователя."""
+
     class Meta:
         model = Subscription
         fields = ('user_id', 'author_id')
-
-
 
     def get_recipes(self, obj):
         request = self.context.get('request')
@@ -134,7 +133,6 @@ class SubscriptionSerializers2(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context.get('request')
         current_user = request.user
-        print(self.initial_data)
         author = self.initial_data['author']
         in_subscribed = Subscription.objects.filter(
             user=current_user,
@@ -155,3 +153,20 @@ class SubscriptionSerializers2(serializers.ModelSerializer):
                     'errors': 'Вы не подписаны на этого автора.'
                 })
         return
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    recipe = serializers.SerializerMethodField()
+
+    # def get_user(self, obj):
+    #     return self.context.get('request').user
+
+    def get_recipe(self,obj):
+        return 1
+        #return self.context.get('recipe_id')
+
+
+    class Meta:
+        fields = ('__all__')
+        model = Favorite

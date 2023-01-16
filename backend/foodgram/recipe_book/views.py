@@ -3,6 +3,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, viewsets, status
 from rest_framework import permissions
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import (LimitOffsetPagination)
 from rest_framework.response import Response
@@ -13,6 +14,7 @@ from recipe_book.permission import IsAuthorOrReadOnly
 from recipe_book.serializers import (RecipeSerializer, TagSerializer,
                                      IngredientSerializers,
                                      SubscriptionSerializers,
+                                     FavoriteSerializer,
                                      )
 
 User = get_user_model()
@@ -39,6 +41,16 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    @action(detail=False, methods=['POST', 'DELETE'],
+            url_path=r'(?P<recipe_id>[\d]+)/favorite',
+            url_name='favorite-recipe')
+    def favorite_add(self, request, recipe_id):
+        if request.method == 'POST':
+            serializer = FavoriteSerializer(data=self.request.data, context={'recipe_id': recipe_id})
+            print(serializer.context.get('recipe_id'))
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
