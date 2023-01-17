@@ -28,9 +28,10 @@ class RecipesViewSet(viewsets.ModelViewSet):
     # pagination_class = PageNumberPagination
     permission_classes = (IsAuthorOrReadOnly,)
     serializer_class = RecipeSerializer
+
     # filter_backends = (filters.SearchFilter,)
     # filter_backends = (DjangoFilterBackend,)
-    #search_fields = ('author', 'name',)
+    # search_fields = ('author', 'name',)
 
     def retrieve(self, request, pk=None):
         queryset = Recipe.objects.all()
@@ -40,10 +41,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-
-
-
-
 
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -114,6 +111,7 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
         except Http404:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class FavoriteViewSet(viewsets.ModelViewSet):
     serializer_class = FavoriteSerializer
