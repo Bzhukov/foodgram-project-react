@@ -1,15 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, viewsets, status
 from rest_framework import permissions
-from rest_framework.decorators import action
+from rest_framework import viewsets, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import (LimitOffsetPagination)
 from rest_framework.response import Response
 
 from recipe_book.filters import IngredientFilter, RecipeFilter
-from recipe_book.models import Recipe, Tag, Ingredient, Subscription
+from recipe_book.models import Recipe, Tag, Ingredient, Subscription, Favorite
 from recipe_book.permission import IsAuthorOrReadOnly
 from recipe_book.serializers import (RecipeSerializer, TagSerializer,
                                      IngredientSerializers,
@@ -29,9 +28,9 @@ class RecipesViewSet(viewsets.ModelViewSet):
     # pagination_class = PageNumberPagination
     permission_classes = (IsAuthorOrReadOnly,)
     serializer_class = RecipeSerializer
-    filter_backends = (filters.SearchFilter,)
+    # filter_backends = (filters.SearchFilter,)
     # filter_backends = (DjangoFilterBackend,)
-    search_fields = ('author', 'name',)
+    #search_fields = ('author', 'name',)
 
     def retrieve(self, request, pk=None):
         queryset = Recipe.objects.all()
@@ -42,15 +41,9 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=False, methods=['POST', 'DELETE'],
-            url_path=r'(?P<recipe_id>[\d]+)/favorite',
-            url_name='favorite-recipe')
-    def favorite_add(self, request, recipe_id):
-        if request.method == 'POST':
-            serializer = FavoriteSerializer(data=self.request.data, context={'recipe_id': recipe_id})
-            print(serializer.context.get('recipe_id'))
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+
+
+
 
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -117,6 +110,29 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
             instance = get_object_or_404(Subscription,
                                          user_id=request.user.id,
                                          author_id=author_id)
+            self.perform_destroy(instance)
+        except Http404:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class FavoriteViewSet(viewsets.ModelViewSet):
+    serializer_class = FavoriteSerializer
+
+    def perform_create(self, serializer):
+        recipe_id = self.kwargs.get('recipe_id')
+        user_id = self.request.user.id
+        queryset = Favorite.objects.filter(
+            recipe_id=recipe_id,
+            user_id=user_id)
+        if queryset.exists():
+            raise ValidationError('Данный рецепт уже добавлен в избранное')
+        serializer.save(user_id=user_id, recipe_id=recipe_id)
+
+    def delete(self, request, recipe_id):
+        try:
+            instance = get_object_or_404(Favorite,
+                                         user_id=request.user.id,
+                                         recipe_id=recipe_id)
             self.perform_destroy(instance)
         except Http404:
             return Response(status=status.HTTP_400_BAD_REQUEST)

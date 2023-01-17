@@ -156,17 +156,13 @@ class SubscriptionSerializers2(serializers.ModelSerializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    user = serializers.SerializerMethodField()
-    recipe = serializers.SerializerMethodField()
+    recipe = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
 
-    # def get_user(self, obj):
-    #     return self.context.get('request').user
-
-    def get_recipe(self,obj):
-        return 1
-        #return self.context.get('recipe_id')
-
+    # def get_recipe_id(self, obj):
+    #     print(obj)
+    #     print(obj.context)
+    #     return obj.context.get('recipe_id')
 
     class Meta:
-        fields = ('__all__')
+        fields = ('recipe',)
         model = Favorite
