@@ -8,7 +8,8 @@ from rest_framework.pagination import (LimitOffsetPagination)
 from rest_framework.response import Response
 
 from recipe_book.filters import IngredientFilter, RecipeFilter
-from recipe_book.models import Recipe, Tag, Ingredient, Subscription, Favorite
+from recipe_book.models import Recipe, Tag, Ingredient, Subscription, Favorite, \
+    Shopping_cart
 from recipe_book.permission import IsAuthorOrReadOnly
 from recipe_book.serializers import (RecipeSerializer, TagSerializer,
                                      IngredientSerializers,
@@ -28,6 +29,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     # pagination_class = PageNumberPagination
     permission_classes = (IsAuthorOrReadOnly,)
     serializer_class = RecipeSerializer
+    http_method_names = ['POST', 'GET', 'DELETE', 'PATCH']
 
     # filter_backends = (filters.SearchFilter,)
     # filter_backends = (DjangoFilterBackend,)
@@ -129,6 +131,29 @@ class FavoriteViewSet(viewsets.ModelViewSet):
     def delete(self, request, recipe_id):
         try:
             instance = get_object_or_404(Favorite,
+                                         user_id=request.user.id,
+                                         recipe_id=recipe_id)
+            self.perform_destroy(instance)
+        except Http404:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ShoppingCartViewSet(viewsets.ModelViewSet):
+
+    def perform_create(self, serializer):
+        recipe_id = self.kwargs.get('recipe_id')
+        user_id = self.request.user.id
+        queryset = Shopping_cart.objects.filter(
+            recipe_id=recipe_id,
+            user_id=user_id)
+        if queryset.exists():
+            raise ValidationError('Данный рецепт уже добавлен в избранное')
+        serializer.save(user_id=user_id, recipe_id=recipe_id)
+
+    def delete(self, request, recipe_id):
+        try:
+            instance = get_object_or_404(Shopping_cart,
                                          user_id=request.user.id,
                                          recipe_id=recipe_id)
             self.perform_destroy(instance)
