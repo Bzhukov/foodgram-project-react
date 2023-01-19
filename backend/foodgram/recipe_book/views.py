@@ -52,7 +52,7 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Tag.objects.all()
     permission_classes = (permissions.AllowAny,)
-    pagination_class = LimitOffsetPagination
+    pagination_class = None
     serializer_class = TagSerializer
     filterset_class = RecipeFilter
     search_fields = ('name',)
