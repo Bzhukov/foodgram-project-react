@@ -148,7 +148,7 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
             recipe_id=recipe_id,
             user_id=user_id)
         if queryset.exists():
-            raise ValidationError('Данный рецепт уже добавлен в избранное')
+            raise ValidationError('Данный рецепт уже добавлен в корзину')
         serializer.save(user_id=user_id, recipe_id=recipe_id)
 
     def delete(self, request, recipe_id):
