@@ -130,9 +130,12 @@ class IngredientSerializers(serializers.ModelSerializer):
 
 
 class SubscriptionSerializers(serializers.ModelSerializer):
-    email = serializers.EmailField(source='author.email', read_only=True)
-    id = serializers.PrimaryKeyRelatedField(source='author', read_only=True)
-    username = serializers.CharField(source='author.username', read_only=True)
+    email = serializers.EmailField(source='author.email',
+                                   read_only=True)
+    id = serializers.PrimaryKeyRelatedField(source='author',
+                                            read_only=True)
+    username = serializers.CharField(source='author.username',
+                                     read_only=True)
     first_name = serializers.CharField(source='author.first_name',
                                        read_only=True)
     last_name = serializers.CharField(source='author.last_name',
@@ -148,26 +151,6 @@ class SubscriptionSerializers(serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return obj.author.recipes.count()
-
-    class Meta:
-        model = Subscription
-        fields = (
-            'email', 'id', 'username', 'first_name', 'last_name', 'recipes',
-            'recipes_count')
-
-
-class SubscriptionSerializers2(serializers.ModelSerializer):
-    """Сериализатор подписки пользователя."""
-
-    class Meta:
-        model = Subscription
-        fields = ('user_id', 'author_id')
-
-    def get_recipes(self, obj):
-        request = self.context.get('request')
-        recipes = obj.author.recipes
-        context = {'request': request}
-        return RecipeReadSerializer(recipes, context=context, many=True).data
 
     def validate(self, data):
         request = self.context.get('request')
@@ -192,6 +175,12 @@ class SubscriptionSerializers2(serializers.ModelSerializer):
                     'errors': 'Вы не подписаны на этого автора.'
                 })
         return
+
+    class Meta:
+        model = Subscription
+        fields = (
+            'email', 'id', 'username', 'first_name', 'last_name', 'recipes',
+            'recipes_count')
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
