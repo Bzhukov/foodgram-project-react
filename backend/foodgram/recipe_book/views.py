@@ -18,7 +18,7 @@ from recipe_book.serializers import (RecipeReadSerializer, TagSerializer,
                                      IngredientSerializers,
                                      SubscriptionSerializers,
                                      ShoppingCartSerializer,
-                                     RecipeWriteSerializer
+                                     RecipeWriteSerializer, FavoriteSerializer
                                      )
 
 User = get_user_model()
@@ -33,10 +33,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
     # pagination_class = PageNumberPagination
     permission_classes = (IsAuthorOrReadOnly,)
     http_method_names = ['post', 'get', 'delete', 'patch']
+    filterset_class = RecipeFilter
 
-    # filter_backends = (filters.SearchFilter,)
-    # filter_backends = (DjangoFilterBackend,)
-    # search_fields = ('author', 'name',)
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
@@ -124,7 +122,7 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):
-    serializer_class = ShoppingCartSerializer
+    serializer_class = FavoriteSerializer
 
     def perform_create(self, serializer):
         recipe_id = self.kwargs.get('recipe_id')
@@ -150,6 +148,7 @@ class FavoriteViewSet(viewsets.ModelViewSet):
 class ShoppingCartViewSet(viewsets.ModelViewSet):
     serializer_class = ShoppingCartSerializer
     http_method_names = ['post', 'get', 'delete']
+    permission_classes = (IsAuthorOrReadOnly,)
 
     def perform_create(self, serializer):
         recipe_id = self.kwargs.get('recipe_id')
