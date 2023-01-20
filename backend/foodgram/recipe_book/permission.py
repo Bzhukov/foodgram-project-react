@@ -2,7 +2,7 @@ from rest_framework import permissions
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
-    """Permissions for change or delete Admin only"""
+    """Права на изменение и удаление разрешены только суперадмину."""
     message = 'Данное действие разрешено только администратору!'
 
     def has_permission(self, request, view):
@@ -16,7 +16,8 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
 
 class IsAuthorOrReadOnly(permissions.BasePermission):
-    """Permissions for change or delete SuperAdmin, or Author only"""
+    """Права на изменение и удаление разрешены только суперадмину,
+    или автору."""
     message = 'Данное действие разрешено СуперАдминистратору или автору'
 
     def has_permission(self, request, view):

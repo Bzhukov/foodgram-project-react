@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from recipe_book.filters import IngredientFilter, RecipeFilter
 from recipe_book.models import Recipe, Tag, Ingredient, Subscription, Favorite, \
     Shopping_cart
-from recipe_book.permission import IsAuthorOrReadOnly
+from recipe_book.permission import IsAuthorOrReadOnly, IsAdminOrReadOnly
 from recipe_book.serializers import (RecipeReadSerializer, TagSerializer,
                                      IngredientSerializers,
                                      SubscriptionSerializers,
@@ -26,7 +26,7 @@ User = get_user_model()
 
 class RecipesViewSet(viewsets.ModelViewSet):
     """
-    Получение списка всех рецептов.
+    Вьюсет рецептов.
     Права доступа: Администратор или только чтение.
     """
     queryset = Recipe.objects.all()
@@ -50,14 +50,17 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+    def perform_update(self, serializer):
+        serializer.save(author=self.request.user)
+
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Получение списка всех Тегов.
+    Вьюсет Тегов.
     Права доступа: Всем.
     """
     queryset = Tag.objects.all()
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (IsAdminOrReadOnly,)
     pagination_class = None
     serializer_class = TagSerializer
     filterset_class = RecipeFilter
@@ -72,11 +75,11 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
 
 class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Получение списка всех Ингридиентов.
-    Права доступа: Всем.
+    Вьюсет Ингридиентов.
+    Права доступа: Читать всем, изменять только суперадмину.
     """
     queryset = Ingredient.objects.all()
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (IsAdminOrReadOnly,)
     serializer_class = IngredientSerializers
     pagination_class = None
     filterset_class = IngredientFilter
@@ -90,6 +93,7 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class SubscriptionsViewSet(viewsets.ModelViewSet):
+    """Вьюсет Подписок"""
     serializer_class = SubscriptionSerializers
 
     def get_queryset(self):
@@ -122,6 +126,7 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):
+    """Вьюсет Избранного"""
     serializer_class = FavoriteSerializer
 
     def perform_create(self, serializer):
@@ -146,6 +151,7 @@ class FavoriteViewSet(viewsets.ModelViewSet):
 
 
 class ShoppingCartViewSet(viewsets.ModelViewSet):
+    """Вьюсет Корзины """
     serializer_class = ShoppingCartSerializer
     http_method_names = ['post', 'get', 'delete']
     permission_classes = (IsAuthorOrReadOnly,)
