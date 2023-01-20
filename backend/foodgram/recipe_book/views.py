@@ -63,7 +63,8 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = None
     serializer_class = TagSerializer
-    filterset_class = RecipeFilter
+    #filterset_class = RecipeFilter
+    http_method_names = ['get',]
     search_fields = ('name',)
 
     def retrieve(self, request, pk=None):
@@ -81,6 +82,7 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
     serializer_class = IngredientSerializers
+    http_method_names = ['post', 'get', 'delete', 'patch']
     pagination_class = None
     filterset_class = IngredientFilter
     search_fields = ('name',)
@@ -93,9 +95,13 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class SubscriptionsViewSet(viewsets.ModelViewSet):
-    """Вьюсет Подписок"""
+    """
+    Вьюсет Подписок
+    Права доступа: Всем авторизованным.
+    """
     serializer_class = SubscriptionSerializers
-
+    permission_classes = (permissions.IsAuthenticated,)
+    http_method_names = ['post', 'get', 'delete']
     def get_queryset(self):
         return Subscription.objects.select_related().filter(
             user=self.request.user)
@@ -126,8 +132,13 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):
-    """Вьюсет Избранного"""
+    """
+    Вьюсет Избранного
+    Права доступа: Всем авторизованным.
+    """
+    permission_classes = (permissions.IsAuthenticated,)
     serializer_class = FavoriteSerializer
+    http_method_names = ['post', 'get', 'delete']
 
     def perform_create(self, serializer):
         recipe_id = self.kwargs.get('recipe_id')
@@ -151,7 +162,10 @@ class FavoriteViewSet(viewsets.ModelViewSet):
 
 
 class ShoppingCartViewSet(viewsets.ModelViewSet):
-    """Вьюсет Корзины """
+    """
+    Вьюсет Корзины
+    Права доступа: автору.
+    """
     serializer_class = ShoppingCartSerializer
     http_method_names = ['post', 'get', 'delete']
     permission_classes = (IsAuthorOrReadOnly,)
@@ -182,8 +196,6 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
             'name',
             'measurement_unit'
         ).annotate(amount=Sum('structure__amount'))
-        print(ingredients)
-
         today = datetime.today()
         shopping_list = (
             f'Список покупок для: {request.user.get_full_name()}\n\n'
