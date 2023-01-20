@@ -31,20 +31,27 @@ class RecipesViewSet(viewsets.ModelViewSet):
     """
     queryset = Recipe.objects.all()
     # pagination_class = PageNumberPagination
-    permission_classes = (IsAuthorOrReadOnly,)
     http_method_names = ['post', 'get', 'delete', 'patch']
     filterset_class = RecipeFilter
 
+    def get_permissions(self):
+        if self.action in ['retrieve',]:
+            permission_classes = [permissions.IsAuthenticated]
+        elif self.action in ['perform_create','perform_update']:
+            permission_classes = [IsAuthorOrReadOnly]
+        else:
+            permission_classes = [permissions.AllowAny]
+        return [permission() for permission in permission_classes]
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
             return RecipeReadSerializer
         return RecipeWriteSerializer
 
+
     def retrieve(self, request, pk=None):
-        queryset = Recipe.objects.all()
-        recipe = get_object_or_404(queryset, pk=pk)
-        serializer = RecipeReadSerializer(recipe)
+        recipe = get_object_or_404(Recipe, pk=pk)
+        serializer = RecipeReadSerializer(recipe, context={'request': request})
         return Response(serializer.data)
 
     def perform_create(self, serializer):
@@ -63,8 +70,8 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = None
     serializer_class = TagSerializer
-    #filterset_class = RecipeFilter
-    http_method_names = ['get',]
+    # filterset_class = RecipeFilter
+    http_method_names = ['get', ]
     search_fields = ('name',)
 
     def retrieve(self, request, pk=None):
@@ -102,6 +109,7 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
     serializer_class = SubscriptionSerializers
     permission_classes = (permissions.IsAuthenticated,)
     http_method_names = ['post', 'get', 'delete']
+
     def get_queryset(self):
         return Subscription.objects.select_related().filter(
             user=self.request.user)
