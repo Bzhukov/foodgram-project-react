@@ -61,6 +61,8 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     is_in_shopping_cart = serializers.SerializerMethodField()
 
     def get_is_favorited(self, obj):
+        print(obj)
+        print(self.context)
         request = self.context.get('request')
         user = request.user
         return Favorite.objects.filter(recipe=obj, user=user).exists()
@@ -160,30 +162,6 @@ class SubscriptionSerializers(serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return obj.author.recipes.count()
-
-    def validate(self, data):
-        request = self.context.get('request')
-        current_user = request.user
-        author = self.initial_data['author']
-        in_subscribed = Subscription.objects.filter(
-            user=current_user,
-            author=author
-        )
-        if request.method == 'POST':
-            if in_subscribed.exists():
-                raise serializers.ValidationError({
-                    'errors': 'Вы уже подписаны на этого автора.'
-                })
-            if author == current_user:
-                raise serializers.ValidationError({
-                    'errors': 'Нельзя подписаться на себя.'
-                })
-        if request.method == 'DELETE':
-            if not in_subscribed.exists():
-                raise serializers.ValidationError({
-                    'errors': 'Вы не подписаны на этого автора.'
-                })
-        return
 
     class Meta:
         model = Subscription

@@ -4,11 +4,9 @@ from recipe_book.models import Ingredient, Recipe, Tag
 
 class RecipeFilter(filters.FilterSet):
     """Фильтр рецептов."""
-    tags = filters.ModelMultipleChoiceFilter(
-        queryset=Tag.objects.all(),
+    tags = filters.AllValuesMultipleFilter(
         field_name='tags__slug',
-        to_field_name='slug',
-    )
+        label='Ссылка')
     is_favorited = filters.NumberFilter(method='get_is_favorited')
     is_in_shopping_cart = filters.NumberFilter(
         method='get_is_in_shopping_cart')

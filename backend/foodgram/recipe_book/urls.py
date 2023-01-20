@@ -6,7 +6,7 @@ from recipe_book.views import (RecipesViewSet, TagsViewSet, IngredientsViewSet,
                                ShoppingCartViewSet)
 
 v1_router = DefaultRouter()
-v1_router.register('recipes/shopping_cart', ShoppingCartViewSet,
+v1_router.register('recipes/download_shopping_cart', ShoppingCartViewSet,
                    basename='shopping_cart')
 v1_router.register('recipes', RecipesViewSet)
 v1_router.register(r'recipes/(?P<recipe_id>[\d]+)/favorite', FavoriteViewSet,
