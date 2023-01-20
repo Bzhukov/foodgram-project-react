@@ -15,7 +15,6 @@ services:
   backend:
     image: ozzomad/foodgram:latest
     restart: always
-    command: python manage.py migrate
     volumes:
       - static_value:/app/static/
       - media_value:/app/media/
