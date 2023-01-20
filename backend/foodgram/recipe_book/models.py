@@ -92,7 +92,7 @@ class Recipe(models.Model):
                                          '(макс 500 символов)')
     ingredients = models.ManyToManyField(
         Ingredient,
-        related_name='reciepe',
+        related_name='recipe',
         blank=True,
         verbose_name='Ингридиенты',
         help_text='Ингридиенты, из которых состоит блюда',
@@ -117,7 +117,7 @@ class Structure(models.Model):
                                on_delete=models.CASCADE, )
     ingredients = models.ForeignKey(Ingredient, related_name='structure',
                                     on_delete=models.CASCADE, )
-    amount = models.PositiveIntegerField(verbose_name='Количество')
+    amount = models.IntegerField(verbose_name='Количество')
 
     def __str__(self):
         return self.recipe.name[:15]

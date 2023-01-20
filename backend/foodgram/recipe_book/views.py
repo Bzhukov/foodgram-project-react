@@ -1,20 +1,24 @@
+from datetime import datetime
+
 from django.contrib.auth import get_user_model
-from django.http import Http404
+from django.db.models import Sum
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from rest_framework import viewsets, status
 from rest_framework.exceptions import ValidationError
-from rest_framework.pagination import (LimitOffsetPagination)
+from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 
 from recipe_book.filters import IngredientFilter, RecipeFilter
 from recipe_book.models import Recipe, Tag, Ingredient, Subscription, Favorite, \
     Shopping_cart
 from recipe_book.permission import IsAuthorOrReadOnly
-from recipe_book.serializers import (RecipeSerializer, TagSerializer,
+from recipe_book.serializers import (RecipeReadSerializer, TagSerializer,
                                      IngredientSerializers,
                                      SubscriptionSerializers,
-                                     FavoriteSerializer,
+                                     ShoppingCartSerializer,
+                                     RecipeWriteSerializer
                                      )
 
 User = get_user_model()
@@ -28,17 +32,21 @@ class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     # pagination_class = PageNumberPagination
     permission_classes = (IsAuthorOrReadOnly,)
-    serializer_class = RecipeSerializer
-    http_method_names = ['POST', 'GET', 'DELETE', 'PATCH']
+    http_method_names = ['post', 'get', 'delete', 'patch']
 
     # filter_backends = (filters.SearchFilter,)
     # filter_backends = (DjangoFilterBackend,)
     # search_fields = ('author', 'name',)
 
+    def get_serializer_class(self):
+        if self.request.method in SAFE_METHODS:
+            return RecipeReadSerializer
+        return RecipeWriteSerializer
+
     def retrieve(self, request, pk=None):
         queryset = Recipe.objects.all()
         recipe = get_object_or_404(queryset, pk=pk)
-        serializer = RecipeSerializer(recipe)
+        serializer = RecipeReadSerializer(recipe)
         return Response(serializer.data)
 
     def perform_create(self, serializer):
@@ -116,7 +124,7 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):
-    serializer_class = FavoriteSerializer
+    serializer_class = ShoppingCartSerializer
 
     def perform_create(self, serializer):
         recipe_id = self.kwargs.get('recipe_id')
@@ -140,6 +148,8 @@ class FavoriteViewSet(viewsets.ModelViewSet):
 
 
 class ShoppingCartViewSet(viewsets.ModelViewSet):
+    serializer_class = ShoppingCartSerializer
+    http_method_names = ['post', 'get', 'delete']
 
     def perform_create(self, serializer):
         recipe_id = self.kwargs.get('recipe_id')
@@ -160,3 +170,27 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
         except Http404:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def list(self, request):
+        ingredients = Ingredient.objects.filter(
+            recipe__shopping_carts__user=request.user).values(
+            'name',
+            'measurement_unit'
+        ).annotate(amount=Sum('structure__amount'))
+        print(ingredients)
+
+        today = datetime.today()
+        shopping_list = (
+            f'Список покупок для: {request.user.get_full_name()}\n\n'
+            f'Дата: {today:%Y-%m-%d}\n\n'
+        )
+        shopping_list += '\n'.join([
+            f'- {ingredient["name"]} '
+            f'({ingredient["measurement_unit"]})'
+            f' - {ingredient["amount"]}'
+            for ingredient in ingredients
+        ])
+        filename = f'{request.user.username}_shopping_list.txt'
+        response = HttpResponse(shopping_list, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+        return response
