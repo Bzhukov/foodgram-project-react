@@ -27,9 +27,17 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class AuthorSerializer(serializers.ModelSerializer):
+    is_subscribed= serializers.SerializerMethodField()
+
+    def get_is_subscribed(self, obj):
+        request = self.context.get('request')
+        user = request.user
+        if user.is_anonymous:
+            return False
+        return Subscription.objects.filter(author=obj, user=user).exists()
     class Meta:
         model = User
-        fields = ('email', 'id', 'username', 'first_name', 'last_name',)
+        fields = ('email', 'id', 'username', 'first_name', 'last_name','is_subscribed')
 
 
 class IngredientSerializer(serializers.ModelSerializer):

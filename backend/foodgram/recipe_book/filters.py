@@ -5,6 +5,7 @@ from recipe_book.models import Ingredient, Recipe
 
 User = get_user_model()
 
+
 class RecipeFilter(filters.FilterSet):
     """Фильтр рецептов."""
     author = filters.ModelChoiceFilter(
