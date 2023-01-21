@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django_filters import rest_framework as filters
 
-from recipe_book.models import Ingredient, Recipe
+from recipe_book.models import Ingredient, Recipe, Tag
 
 User = get_user_model()
 
@@ -10,9 +10,11 @@ class RecipeFilter(filters.FilterSet):
     """Фильтр рецептов."""
     author = filters.ModelChoiceFilter(
         queryset=User.objects.all())
-    tags = filters.AllValuesMultipleFilter(
+    tags = filters.ModelMultipleChoiceFilter(
         field_name='tags__slug',
-        label='Ссылка')
+        to_field_name='slug',
+        queryset=Tag.objects.all(),
+    )
     is_favorited = filters.NumberFilter(method='get_is_favorited')
     is_in_shopping_cart = filters.NumberFilter(
         method='get_is_in_shopping_cart')
