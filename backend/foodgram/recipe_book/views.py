@@ -8,7 +8,6 @@ from django_filters import rest_framework as filters
 from rest_framework import permissions
 from rest_framework import viewsets, status
 from rest_framework.exceptions import ValidationError
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 
