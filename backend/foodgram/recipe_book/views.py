@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from recipe_book.filters import IngredientFilter, RecipeFilter
 from recipe_book.models import (Recipe, Tag, Ingredient, Subscription,
                                 Favorite, Shopping_cart)
+from recipe_book.pagination import LimitPageNumberPagination
 from recipe_book.permission import IsAuthorOrReadOnly, IsAdminOrReadOnly
 from recipe_book.serializers import (RecipeReadSerializer, TagSerializer,
                                      IngredientSerializers,
@@ -31,7 +32,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     Права доступа: Администратор или только чтение.
     """
     queryset = Recipe.objects.all()
-    # pagination_class = PageNumberPagination
+    pagination_class = LimitPageNumberPagination
     http_method_names = ['post', 'get', 'delete', 'patch']
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -118,7 +119,7 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset=Subscription.objects.select_related().filter(
             user=request.user)
-        serializer = self.serializer_class(queryset, many=True)
+        serializer = self.serializer_class(queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
     def perform_create(self, serializer):
@@ -152,6 +153,9 @@ class FavoriteViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = FavoriteSerializer
     http_method_names = ['post', 'get', 'delete']
+
+    def get_queryset(self):
+        return Favorite.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         recipe_id = self.kwargs.get('recipe_id')
