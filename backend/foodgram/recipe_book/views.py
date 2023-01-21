@@ -38,9 +38,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_permissions(self):
-        if self.action in ['retrieve', ]:
-            permission_classes = [permissions.IsAuthenticated]
-        elif self.action in ['perform_create', 'perform_update']:
+        if self.action in ['perform_create', 'perform_update']:
             permission_classes = [IsAuthorOrReadOnly]
         else:
             permission_classes = [permissions.AllowAny]
