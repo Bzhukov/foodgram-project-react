@@ -8,6 +8,7 @@ from django_filters import rest_framework as filters
 from rest_framework import permissions
 from rest_framework import viewsets, status
 from rest_framework.exceptions import ValidationError
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 
@@ -49,7 +50,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
             return RecipeReadSerializer
         return RecipeWriteSerializer
 
-    def retrieve(self, request, pk=None,*args, **kwargs):
+    def retrieve(self, request, pk=None, *args, **kwargs):
         recipe = get_object_or_404(Recipe, pk=pk)
         serializer = RecipeReadSerializer(recipe, context={'request': request})
         return Response(serializer.data)
@@ -73,7 +74,7 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     http_method_names = ['get', ]
     search_fields = ('name', 'slug')
 
-    def retrieve(self, request, pk=None,*args, **kwargs):
+    def retrieve(self, request, pk=None, *args, **kwargs):
         queryset = Tag.objects.all()
         tag = get_object_or_404(queryset, pk=pk)
         serializer = TagSerializer(tag)
@@ -94,7 +95,7 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = IngredientFilter
     search_fields = ('name',)
 
-    def retrieve(self, request, pk=None,*args, **kwargs):
+    def retrieve(self, request, pk=None, *args, **kwargs):
         queryset = Ingredient.objects.all()
         ingredient = get_object_or_404(queryset, pk=pk)
         serializer = IngredientSerializers(ingredient)
@@ -106,18 +107,21 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
     Вьюсет Подписок
     Права доступа: Всем авторизованным.
     """
+    queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializers
     permission_classes = (permissions.IsAuthenticated,)
     http_method_names = ['post', 'get', 'delete']
-
-    def get_queryset(self):
-        return Subscription.objects.select_related().filter(
-            user=self.request.user)
+    pagination_class = LimitPageNumberPagination
 
     def list(self, request, *args, **kwargs):
-        queryset=Subscription.objects.select_related().filter(
+        queryset = Subscription.objects.select_related().filter(
             user=request.user)
-        serializer = self.serializer_class(queryset, many=True, context={'request': request})
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.serializer_class(queryset, many=True,
+                                           context={'request': request})
         return Response(serializer.data)
 
     def perform_create(self, serializer):
