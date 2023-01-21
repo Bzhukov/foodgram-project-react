@@ -1,10 +1,14 @@
+from django.contrib.auth import get_user_model
 from django_filters import rest_framework as filters
 
 from recipe_book.models import Ingredient, Recipe
 
+User = get_user_model()
 
 class RecipeFilter(filters.FilterSet):
     """Фильтр рецептов."""
+    author = filters.ModelChoiceFilter(
+        queryset=User.objects.all())
     tags = filters.AllValuesMultipleFilter(
         field_name='tags__slug',
         label='Ссылка')
