@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 
 User = get_user_model()
@@ -51,6 +52,7 @@ class Tag(models.Model):
     class Meta:
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
+        ordering = ('name',)
 
     def __str__(self):
         return self.name[:15]
@@ -58,10 +60,13 @@ class Tag(models.Model):
 
 class Ingredient(models.Model):
     """Ингридиенты."""
-    name = models.CharField(max_length=75, unique=True,
+    name = models.CharField(max_length=75,
+                            unique=True,
                             verbose_name='Название')
     measurement_unit = models.CharField(
-        max_length=80, choices=UNITS, default='g',
+        max_length=80,
+        choices=UNITS,
+        default='g',
         verbose_name='Единица измерения',
     )
 
@@ -76,9 +81,11 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     """Рецепты."""
-    author = models.ForeignKey(User, related_name='recipes',
+    author = models.ForeignKey(User,
+                               related_name='recipes',
                                on_delete=models.CASCADE)
-    name = models.CharField(max_length=200, unique=True,
+    name = models.CharField(max_length=200,
+                            unique=True,
                             verbose_name='Название')
     image = models.ImageField(
         upload_to=directory_path,
@@ -100,32 +107,38 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(Tag)
     cooking_time = models.PositiveIntegerField(
-        verbose_name="Время приготовления в минутах", )
-
-    def __str__(self):
-        return self.name[:15]
+        verbose_name="Время приготовления в минутах",
+        validators=[MinValueValidator(1), MinValueValidator(600)]
+    )
 
     class Meta:
         ordering = ('cooking_time',)
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 
+    def __str__(self):
+        return self.name[:15]
+
 
 class Structure(models.Model):
     """Состав рецептов"""
-    recipe = models.ForeignKey(Recipe, related_name='structure',
+    recipe = models.ForeignKey(Recipe,
+                               related_name='structure',
                                on_delete=models.CASCADE, )
-    ingredients = models.ForeignKey(Ingredient, related_name='structure',
+    ingredients = models.ForeignKey(Ingredient,
+                                    related_name='structure',
                                     on_delete=models.CASCADE, )
-    amount = models.IntegerField(verbose_name='Количество')
-
-    def __str__(self):
-        return self.recipe.name[:15]
+    amount = models.IntegerField(verbose_name='Количество',
+                                 validators=[MinValueValidator(1),
+                                             MinValueValidator(999)])
 
     class Meta:
         ordering = ('recipe',)
         verbose_name = 'Состав рецепта'
         verbose_name_plural = 'Составы рецепта'
+
+    def __str__(self):
+        return self.recipe.name[:15]
 
 
 class Subscription(models.Model):
@@ -143,10 +156,8 @@ class Subscription(models.Model):
         verbose_name='Автор'
     )
 
-    def __str__(self):
-        return f'{self.user.first_name} {self.user.last_name}'
-
     class Meta:
+        ordering = ('user',)
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'author'],
@@ -155,6 +166,9 @@ class Subscription(models.Model):
         ]
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+
+    def __str__(self):
+        return f'{self.user.first_name} {self.user.last_name}'
 
 
 class Favorite(models.Model):
@@ -172,10 +186,8 @@ class Favorite(models.Model):
         verbose_name='Рецепт'
     )
 
-    def __str__(self):
-        return f'{self.user.first_name} {self.user.last_name}: {self.recipe}'
-
     class Meta:
+        ordering = ('user',)
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
@@ -184,6 +196,9 @@ class Favorite(models.Model):
         ]
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
+
+    def __str__(self):
+        return f'{self.user.first_name} {self.user.last_name}: {self.recipe}'
 
 
 class Shopping_cart(models.Model):
@@ -201,10 +216,8 @@ class Shopping_cart(models.Model):
         verbose_name='Рецепт'
     )
 
-    def __str__(self):
-        return f'{self.user.first_name} {self.user.last_name}: {self.recipe}'
-
     class Meta:
+        ordering = ('user',)
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
@@ -213,3 +226,6 @@ class Shopping_cart(models.Model):
         ]
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Список покупок'
+
+    def __str__(self):
+        return f'{self.user.first_name} {self.user.last_name}: {self.recipe}'
