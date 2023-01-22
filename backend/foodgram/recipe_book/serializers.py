@@ -5,8 +5,8 @@ from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from recipe_book.models import Recipe, Tag, Ingredient, Subscription, Favorite, \
-    Shopping_cart, Structure
+from recipe_book.models import (Recipe, Tag, Ingredient, Subscription,
+                                Favorite, Shopping_cart, Structure)
 
 User = get_user_model()
 
@@ -27,7 +27,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class AuthorSerializer(serializers.ModelSerializer):
-    is_subscribed= serializers.SerializerMethodField()
+    is_subscribed = serializers.SerializerMethodField()
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
@@ -35,9 +35,12 @@ class AuthorSerializer(serializers.ModelSerializer):
         if user.is_anonymous:
             return False
         return Subscription.objects.filter(author=obj, user=user).exists()
+
     class Meta:
         model = User
-        fields = ('email', 'id', 'username', 'first_name', 'last_name','is_subscribed')
+        fields = (
+            'email', 'id', 'username', 'first_name', 'last_name',
+            'is_subscribed')
 
 
 class IngredientSerializer(serializers.ModelSerializer):

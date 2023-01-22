@@ -1,8 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-class User(AbstractUser):
 
+class User(AbstractUser):
     email = models.EmailField(
         error_messages={'unique': 'Пользователь с таким email уже существует'},
         blank=True,
@@ -25,4 +25,3 @@ class User(AbstractUser):
                 name="username_is_not_me"
             )
         ]
-

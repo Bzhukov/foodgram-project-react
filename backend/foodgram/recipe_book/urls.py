@@ -18,10 +18,9 @@ v1_router.register('users/subscriptions', SubscriptionsViewSet,
 v1_router.register(r'users/(?P<author_id>[\d]+)/subscribe',
                    SubscriptionsViewSet,
                    basename='subscribe'),
-v1_router.register('recipes/(?P<recipe_id>[\d]+)/shopping_cart', ShoppingCartViewSet,
+v1_router.register('recipes/(?P<recipe_id>[\d]+)/shopping_cart',
+                   ShoppingCartViewSet,
                    basename='shopping_cart')
-
-
 
 urlpatterns = [
     path('', include(v1_router.urls)),

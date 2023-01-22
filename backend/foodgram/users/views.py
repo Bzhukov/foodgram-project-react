@@ -16,7 +16,8 @@ class CustomAuthToken(ObtainAuthToken):
     Получение токена в обмен на email и password.
     Права доступа: Доступно без токена.
     """
-    filter_backends = (LimitOffsetPagination ,)
+    filter_backends = (LimitOffsetPagination,)
+
     def post(self, request, *args, **kwargs):
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -28,4 +29,7 @@ class CustomAuthToken(ObtainAuthToken):
             token, created = Token.objects.get_or_create(user=user)
             return Response({'auth_token': token.key, },
                             status=status.HTTP_200_OK)
+        else:
+            return Response({'password': 'Введен неверный пароль', },
+                            status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
