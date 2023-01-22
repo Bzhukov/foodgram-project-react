@@ -121,6 +121,14 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 5,
 }
 
+DJOSER = {
+    'PERMISSIONS': {
+        'user': ['rest_framework.permissions.AllowAny'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
+    },
+
+}
+
 STATIC_URL = '/static/'
 
 MEDIA_URL = '/media/'
