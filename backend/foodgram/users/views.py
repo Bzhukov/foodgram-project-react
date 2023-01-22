@@ -28,6 +28,6 @@ class CustomAuthToken(ObtainAuthToken):
             token, created = Token.objects.get_or_create(user=user)
             return Response({'auth_token': token.key, },
                             status=status.HTTP_200_OK)
-        else:
-            return Response({'password': 'Введен неверный пароль', },
+
+        return Response({'password': 'Введен неверный пароль', },
                             status=status.HTTP_400_BAD_REQUEST)
