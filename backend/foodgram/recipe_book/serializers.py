@@ -100,16 +100,24 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=True, allow_null=False)
 
     def create_ingredients(self, ingredients, recipe):
-        for ingredient in ingredients:
-            amount = int(ingredient.get('amount'))
-            ingredient = get_object_or_404(Ingredient, pk=ingredient.get('id'))
-            Structure.objects.create(recipe=recipe, ingredients=ingredient,
-                                     amount=amount)
+        Structure.objects.bulk_create([Structure(
+            ingredients=get_object_or_404(Ingredient, pk=ingredient.get('id')),
+            recipe=recipe,
+            amount=int(ingredient.get('amount'))
+        ) for ingredient in ingredients])
 
     def validate_ingredients(self, ingredients):
         if not ingredients:
             raise serializers.ValidationError(
                 'Мин. 1 ингредиент в рецепте!')
+        unique_ingredients = []
+        for ingredient in ingredients:
+            ingredient = get_object_or_404(Ingredient, id=ingredient['id'])
+            if ingredient in unique_ingredients:
+                raise serializers.ValidationError({
+                    'ingredients': f'{ingredient} дублируется в данном рецепте!'
+                })
+            unique_ingredients.append(ingredient)
         return ingredients
 
     def create(self, validated_data):
@@ -132,9 +140,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         return RecipeReadSerializer(
             instance,
-            context={
-                'request': self.context.get('request')
-            }).data
+            context=self.context).data
 
     class Meta:
         model = Recipe

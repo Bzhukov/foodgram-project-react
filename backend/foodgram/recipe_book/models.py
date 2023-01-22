@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 User = get_user_model()
@@ -108,7 +108,7 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(Tag)
     cooking_time = models.PositiveIntegerField(
         verbose_name="Время приготовления в минутах",
-        validators=[MinValueValidator(1), MinValueValidator(600)]
+        validators=[MinValueValidator(1), MaxValueValidator(600)]
     )
 
     class Meta:
@@ -130,7 +130,7 @@ class Structure(models.Model):
                                     on_delete=models.CASCADE, )
     amount = models.IntegerField(verbose_name='Количество',
                                  validators=[MinValueValidator(1),
-                                             MinValueValidator(999)])
+                                             MaxValueValidator(999)])
 
     class Meta:
         ordering = ('recipe',)
