@@ -7,11 +7,10 @@ User = get_user_model()
 
 class CustomUserAdmin(UserAdmin):
     list_editable = ('first_name', 'last_name', 'email',)
-    ordering = ('first_name','last_name',)
+    ordering = ('first_name', 'last_name',)
     search_fields = ('email', 'first_name', 'last_name')
     list_filter = ('email', 'first_name', 'last_name')
     empty_value_display = '-пусто-'
-
 
 
 admin.site.register(User, CustomUserAdmin)

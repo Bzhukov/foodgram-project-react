@@ -23,6 +23,7 @@ class Base64ImageField(serializers.ImageField):
 
 class TagSerializer(serializers.ModelSerializer):
     """Сериализатор Тэгов."""
+
     class Meta:
         model = Tag
         fields = '__all__'
@@ -127,7 +128,8 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             ingredient = get_object_or_404(Ingredient, id=ingredient['id'])
             if ingredient in unique_ingredients:
                 raise serializers.ValidationError({
-                    'ingredients': f'{ingredient} дублируется в данном рецепте!'
+                    'ingredients':
+                        f'{ingredient} дублируется в данном рецепте!'
                 })
             unique_ingredients.append(ingredient)
         return ingredients
@@ -211,6 +213,7 @@ class SubscriptionReadSerializer(serializers.ModelSerializer):
 
 class SubscriptionWriteSerializer(serializers.ModelSerializer):
     """Сериализатор подписок для записи данных"""
+
     class Meta:
         fields = ('__all__')
         model = Subscription
@@ -245,6 +248,7 @@ class ShoppingCartReadSerializer(serializers.ModelSerializer):
 
 class ShoppingCartWriteSerializer(serializers.ModelSerializer):
     """Сериализатор списка покупок для записи данных"""
+
     class Meta:
         fields = ('__all__')
         model = Shopping_cart
@@ -260,6 +264,7 @@ class ShoppingCartWriteSerializer(serializers.ModelSerializer):
 
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализатор избранных рецептов"""
+
     class Meta:
         fields = ('__all__')
         model = Favorite
