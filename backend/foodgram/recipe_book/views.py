@@ -121,7 +121,8 @@ class FavoriteViewSet(mixins.CreateModelMixin,
     serializer_class = FavoriteSerializer
     http_method_names = ['post', 'delete']
 
-    @action(detail=True, methods=['post', 'delete'])
+    @action(detail=True, methods=['post', 'delete'], url_name='favorite',
+            url_path='favorite')
     def favorite(self, request, pk=None):
         if request.method == 'DELETE':
             instance = get_object_or_404(Favorite,
