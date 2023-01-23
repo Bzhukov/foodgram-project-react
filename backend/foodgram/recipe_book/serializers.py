@@ -276,7 +276,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
             raise ValidationError(
                 detail='Вы уже добавили данный рецепт',
                 code=status.HTTP_400_BAD_REQUEST)
-        if Recipe.objects.get(pk=recipe).DoesNotExist():
+        if Recipe.objects.filter(pk=recipe.pk).count == 0:
             raise ValidationError(
                 detail='Данного рецепта не существует',
                 code=status.HTTP_400_BAD_REQUEST)

@@ -121,8 +121,7 @@ class FavoriteViewSet(mixins.CreateModelMixin,
     serializer_class = FavoriteSerializer
     http_method_names = ['post', 'delete']
 
-    @action(detail=True, methods=['post', 'delete'], url_name='favorite',
-            url_path='favorite')
+    @action(detail=True, methods=['post', 'delete'],)
     def favorite(self, request, pk=None):
         if request.method == 'DELETE':
             instance = get_object_or_404(Favorite,
@@ -151,25 +150,20 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post', 'delete'])
     def shopping_cart(self, request, pk=None):
-        try:
-            if request.method == 'DELETE':
-                instance = get_object_or_404(Shopping_cart,
-                                             user_id=request.user.id,
-                                             recipe_id=pk)
-                self.perform_destroy(instance)
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            if request.method == 'POST':
-                serializer = ShoppingCartWriteSerializer(
-                    data={'user': request.user.id, 'recipe': pk},
-                    context={'request': self.request}
-                )
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
-                return Response(serializer.data,
-                                status=status.HTTP_201_CREATED)
-        except Exception as err:
-            print(err)
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if request.method == 'DELETE':
+            instance = get_object_or_404(Shopping_cart,
+                                         user_id=request.user.id,
+                                         recipe_id=pk)
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        if request.method == 'POST':
+            serializer = ShoppingCartWriteSerializer(
+                data={'user': request.user.id, 'recipe': pk},
+                context={'request': self.request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['get'])
     def download_shopping_cart(self, request):
