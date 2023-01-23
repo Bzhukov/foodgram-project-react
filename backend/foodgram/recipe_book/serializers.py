@@ -121,19 +121,27 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return ingredients
 
     def create(self, validated_data):
+        user = self.context.get('request').user
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data)
+        recipe = Recipe.objects.create(**validated_data, author=user)
         recipe.tags.set(tags)
         self.create_ingredients(ingredients, recipe)
         return recipe
 
     def update(self, instance, validated_data):
+        user = self.context.get('request').user
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         instance.tags.set(tags)
         instance.ingredients.clear()
         self.create_ingredients(ingredients, instance)
+        instance.name = validated_data.get('name', instance.name)
+        instance.image = validated_data.get('content', instance.image)
+        instance.text = validated_data.get('text', instance.text)
+        instance.cooking_time = validated_data.get('cooking_time',
+                                                   instance.cooking_time)
+        instance.author_id = user.id
         instance.save()
         return instance
 
@@ -159,7 +167,7 @@ class IngredientSerializers(serializers.ModelSerializer):
         fields = ('__all__')
 
 
-class SubscriptionSerializers(serializers.ModelSerializer):
+class SubscriptionReadSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='author.email',
                                    read_only=True)
     id = serializers.PrimaryKeyRelatedField(source='author',
@@ -192,15 +200,19 @@ class SubscriptionSerializers(serializers.ModelSerializer):
             'recipes_count')
 
 
-class FavoriteSerializer(serializers.ModelSerializer):
-    recipe = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-
+class SubscriptionWriteSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('recipe',)
+        fields = ('__all__')
+        model = Subscription
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('__all__')
         model = Favorite
 
 
-class ShoppingCartSerializer(serializers.ModelSerializer):
+class ShoppingCartReadSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='recipe.name', read_only=True)
     image = serializers.CharField(source='recipe.image', read_only=True)
     cooking_time = serializers.CharField(source='recipe.cooking_time',
@@ -208,4 +220,10 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('id', 'name', 'image', 'cooking_time')
+        model = Shopping_cart
+
+
+class ShoppingCartWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('__all__')
         model = Shopping_cart
