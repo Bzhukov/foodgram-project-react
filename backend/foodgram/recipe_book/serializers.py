@@ -2,6 +2,7 @@ import base64
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
@@ -62,7 +63,8 @@ class IngredientSerializer(serializers.ModelSerializer):
 class StructureSerializer(serializers.ModelSerializer):
     """Сериализатор состава рецепта."""
     id = serializers.IntegerField()
-    amount = serializers.IntegerField()
+    amount = serializers.IntegerField(
+        validators=[MaxValueValidator(99999), MinValueValidator(1)])
 
     class Meta:
         model = Structure
