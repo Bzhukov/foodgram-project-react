@@ -8,7 +8,6 @@ from django_filters import rest_framework as filters
 from rest_framework import permissions, mixins
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -18,14 +17,15 @@ from recipe_book.models import (Recipe, Tag, Ingredient, Subscription,
                                 Favorite, Shopping_cart)
 from recipe_book.pagination import LimitPageNumberPagination
 from recipe_book.permission import IsAuthorOrReadOnly, IsAdminOrReadOnly
-from recipe_book.serializers import (RecipeReadSerializer, TagSerializer,
+from recipe_book.serializers import (TagSerializer,
                                      IngredientSerializers,
                                      SubscriptionReadSerializer,
                                      SubscriptionWriteSerializer,
                                      ShoppingCartReadSerializer,
-                                     FavoriteSerializer,
                                      ShoppingCartWriteSerializer,
-                                     RecipeWriteSerializer
+                                     RecipeWriteSerializer,
+                                     RecipeReadSerializer,
+                                     FavoriteSerializer,
                                      )
 
 User = get_user_model()
@@ -43,12 +43,10 @@ class RecipesViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
     permission_classes = (IsAuthorOrReadOnly,)
 
-
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
             return RecipeReadSerializer
         return RecipeWriteSerializer
-
 
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -63,6 +61,7 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     http_method_names = ['get', ]
     search_fields = ('name', 'slug')
 
+
 class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Вьюсет Ингридиентов.
@@ -71,11 +70,12 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
     serializer_class = IngredientSerializers
-    http_method_names = ['get',]
+    http_method_names = ['get', ]
     pagination_class = None
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = IngredientFilter
     search_fields = ('name',)
+
 
 class SubscriptionsViewSet(mixins.CreateModelMixin,
                            mixins.DestroyModelMixin,
@@ -93,62 +93,50 @@ class SubscriptionsViewSet(mixins.CreateModelMixin,
 
     @action(detail=True, methods=['post', 'delete'])
     def subscribe(self, request, pk=None):
-        try:
-            if request.method == 'DELETE':
-                instance = get_object_or_404(Subscription,
-                                             user_id=request.user.id,
-                                             author_id=pk)
-                self.perform_destroy(instance)
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            if request.method == 'POST':
-                serializer = SubscriptionWriteSerializer(
-                    data={'user': request.user.pk, 'author': pk},
-                    context={'request': self.request}
-                )
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
-                return Response(serializer.data,
-                                status=status.HTTP_201_CREATED)
-        except Exception as err:
-            return Response(data={'error': str(err)},
-                            status=status.HTTP_400_BAD_REQUEST)
+        if request.method == 'DELETE':
+            instance = get_object_or_404(Subscription,
+                                         user_id=request.user.id,
+                                         author_id=pk)
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        if request.method == 'POST':
+            serializer = SubscriptionWriteSerializer(
+                data={'user': request.user.pk, 'author': pk},
+                context={'request': self.request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED)
 
 
 class FavoriteViewSet(mixins.CreateModelMixin,
-                   mixins.DestroyModelMixin,
-                   GenericViewSet):
+                      mixins.DestroyModelMixin,
+                      GenericViewSet):
     """
     Вьюсет Избранного
     Права доступа: Всем авторизованным.
     """
+    queryset = Favorite.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = FavoriteSerializer
     http_method_names = ['post', 'delete']
 
-    def get_queryset(self):
-        return Favorite.objects.filter(user=self.request.user)
-
     @action(detail=True, methods=['post', 'delete'])
     def favorite(self, request, pk=None):
-        try:
-            if request.method == 'DELETE':
-                instance = get_object_or_404(Favorite,
-                                             user_id=request.user.id,
-                                             recipe_id=pk)
-                self.perform_destroy(instance)
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            if request.method == 'POST':
-                serializer = self.serializer_class(
-                    data={'user': request.user.pk, 'recipe': pk},
-                    context={'request': self.request}
-                )
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
-                return Response(serializer.data,
-                                status=status.HTTP_201_CREATED)
-        except Exception as err:
-            return Response(data={'error': str(err)},
-                            status=status.HTTP_400_BAD_REQUEST)
+        if request.method == 'DELETE':
+            instance = get_object_or_404(Favorite,
+                                         user_id=request.user.id,
+                                         recipe_id=pk)
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        if request.method == 'POST':
+            serializer = self.serializer_class(
+                data={'user': request.user.pk, 'recipe': pk},
+                context={'request': self.request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class ShoppingCartViewSet(viewsets.ModelViewSet):
     """
