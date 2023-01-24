@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
+from foodgram.settings import MIN_INGREDIENT_AMOUNT, MAX_INGREDIENT_AMOUNT
+
 User = get_user_model()
 
 UNITS = (
@@ -129,8 +131,9 @@ class Structure(models.Model):
                                     related_name='structure',
                                     on_delete=models.CASCADE, )
     amount = models.IntegerField(verbose_name='Количество',
-                                 validators=[MinValueValidator(1),
-                                             MaxValueValidator(999)])
+                                 validators=[
+                                     MinValueValidator(MIN_INGREDIENT_AMOUNT),
+                                     MaxValueValidator(MAX_INGREDIENT_AMOUNT)])
 
     class Meta:
         ordering = ('recipe',)

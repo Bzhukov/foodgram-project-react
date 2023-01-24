@@ -48,6 +48,9 @@ class RecipesViewSet(viewsets.ModelViewSet):
             return RecipeReadSerializer
         return RecipeWriteSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     """

@@ -135,3 +135,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 FIXTURE_DIRS = (
     os.path.join(BASE_DIR, 'fixtures'),
 )
+
+
+MAX_INGREDIENT_AMOUNT=9999
+MIN_INGREDIENT_AMOUNT=1

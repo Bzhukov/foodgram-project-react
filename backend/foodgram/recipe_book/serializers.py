@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 
+from foodgram.settings import MAX_INGREDIENT_AMOUNT, MIN_INGREDIENT_AMOUNT
 from recipe_book.models import (Recipe, Tag, Ingredient, Subscription,
                                 Favorite, Shopping_cart, Structure)
 
@@ -64,7 +65,8 @@ class StructureSerializer(serializers.ModelSerializer):
     """Сериализатор состава рецепта."""
     id = serializers.IntegerField()
     amount = serializers.IntegerField(
-        validators=[MaxValueValidator(99999), MinValueValidator(1)])
+        validators=[MaxValueValidator(MAX_INGREDIENT_AMOUNT),
+                    MinValueValidator(MIN_INGREDIENT_AMOUNT)])
 
     class Meta:
         model = Structure
@@ -125,22 +127,21 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         if not ingredients:
             raise serializers.ValidationError(
                 'Мин. 1 ингредиент в рецепте!')
-        unique_ingredients = []
-        for ingredient in ingredients:
-            ingredient = get_object_or_404(Ingredient, id=ingredient['id'])
-            if ingredient in unique_ingredients:
-                raise serializers.ValidationError({
-                    'ingredients':
-                        f'{ingredient} дублируется в данном рецепте!'
-                })
-            unique_ingredients.append(ingredient)
+
+        if len(ingredients) > len(set(
+                dict(ingredient.items())['id'] for ingredient in
+                ingredients)):
+            # OrderDict напрямую в set не переводится, поэтому пришлось
+            # использовать такую ивзращенную конструкцию. Понимаю что это
+            # плохо, но цикла избежать не удалось
+            raise serializers.ValidationError({
+                'ingredients': 'Ингредиенты дублируется в данном рецепте!'})
         return ingredients
 
     def create(self, validated_data):
-        user = self.context.get('request').user
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data, author=user)
+        recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
         self.create_ingredients(ingredients, recipe)
         return recipe
