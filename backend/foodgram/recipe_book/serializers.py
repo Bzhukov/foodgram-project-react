@@ -8,8 +8,8 @@ from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 
 from foodgram.settings import MAX_INGREDIENT_AMOUNT, MIN_INGREDIENT_AMOUNT
-from recipe_book.models import (Recipe, Tag, Ingredient, Subscription,
-                                Favorite, Shopping_cart, Structure)
+from recipe_book.models import (Favorite, Ingredient, Recipe, ShoppingCart,
+                                Structure, Subscription, Tag)
 
 User = get_user_model()
 
@@ -102,7 +102,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         user = request.user
         if user.is_anonymous:
             return False
-        return Shopping_cart.objects.filter(recipe=obj, user=user).exists()
+        return ShoppingCart.objects.filter(recipe=obj, user=user).exists()
 
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
@@ -246,7 +246,7 @@ class ShoppingCartReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('id', 'name', 'image', 'cooking_time')
-        model = Shopping_cart
+        model = ShoppingCart
 
 
 class ShoppingCartWriteSerializer(serializers.ModelSerializer):
@@ -254,7 +254,7 @@ class ShoppingCartWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('__all__')
-        model = Shopping_cart
+        model = ShoppingCart
 
     def validate(self, data):
         user = data.get('user')

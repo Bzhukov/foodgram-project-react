@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from foodgram.settings import MIN_INGREDIENT_AMOUNT, MAX_INGREDIENT_AMOUNT
+from foodgram.settings import MAX_INGREDIENT_AMOUNT, MIN_INGREDIENT_AMOUNT
 
 User = get_user_model()
 
@@ -204,7 +204,7 @@ class Favorite(models.Model):
         return f'{self.user.first_name} {self.user.last_name}: {self.recipe}'
 
 
-class Shopping_cart(models.Model):
+class ShoppingCart(models.Model):
     """Корзина покупок."""
     user = models.ForeignKey(
         User,

@@ -5,28 +5,25 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
-from rest_framework import permissions, mixins
-from rest_framework import viewsets, status
+from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from recipe_book.filters import IngredientFilter, RecipeFilter
-from recipe_book.models import (Recipe, Tag, Ingredient, Subscription,
-                                Favorite, Shopping_cart)
+from recipe_book.models import (Favorite, Ingredient, Recipe, ShoppingCart,
+                                Subscription, Tag)
 from recipe_book.pagination import LimitPageNumberPagination
-from recipe_book.permission import IsAuthorOrReadOnly, IsAdminOrReadOnly
-from recipe_book.serializers import (TagSerializer,
-                                     IngredientSerializers,
-                                     SubscriptionReadSerializer,
-                                     SubscriptionWriteSerializer,
+from recipe_book.permission import IsAdminOrReadOnly, IsAuthorOrReadOnly
+from recipe_book.serializers import (FavoriteSerializer, IngredientSerializers,
+                                     RecipeReadSerializer,
+                                     RecipeWriteSerializer,
                                      ShoppingCartReadSerializer,
                                      ShoppingCartWriteSerializer,
-                                     RecipeWriteSerializer,
-                                     RecipeReadSerializer,
-                                     FavoriteSerializer,
-                                     )
+                                     SubscriptionReadSerializer,
+                                     SubscriptionWriteSerializer,
+                                     TagSerializer)
 
 User = get_user_model()
 
@@ -110,6 +107,8 @@ class SubscriptionsViewSet(mixins.CreateModelMixin,
             serializer.save()
             return Response(serializer.data,
                             status=status.HTTP_201_CREATED)
+        return Response(
+            status=status.HTTP_400_BAD_REQUEST)
 
 
 class FavoriteViewSet(mixins.CreateModelMixin,
@@ -124,7 +123,7 @@ class FavoriteViewSet(mixins.CreateModelMixin,
     serializer_class = FavoriteSerializer
     http_method_names = ['post', 'delete']
 
-    @action(detail=True, methods=['post', 'delete'],)
+    @action(detail=True, methods=['post', 'delete'], )
     def favorite(self, request, pk=None):
         if request.method == 'DELETE':
             instance = get_object_or_404(Favorite,
@@ -139,6 +138,8 @@ class FavoriteViewSet(mixins.CreateModelMixin,
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            status=status.HTTP_400_BAD_REQUEST)
 
 
 class ShoppingCartViewSet(viewsets.ModelViewSet):
@@ -149,12 +150,12 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
     serializer_class = ShoppingCartReadSerializer
     http_method_names = ['post', 'get', 'delete']
     permission_classes = (IsAuthorOrReadOnly,)
-    queryset = Shopping_cart.objects.all()
+    queryset = ShoppingCart.objects.all()
 
     @action(detail=True, methods=['post', 'delete'])
     def shopping_cart(self, request, pk=None):
         if request.method == 'DELETE':
-            instance = get_object_or_404(Shopping_cart,
+            instance = get_object_or_404(ShoppingCart,
                                          user_id=request.user.id,
                                          recipe_id=pk)
             self.perform_destroy(instance)
@@ -167,6 +168,8 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data,
                             status=status.HTTP_201_CREATED)
+        return Response(
+            status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['get'])
     def download_shopping_cart(self, request):
