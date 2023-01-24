@@ -5,12 +5,6 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
-from rest_framework import mixins, permissions, status, viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import SAFE_METHODS
-from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
-
 from recipe_book.filters import IngredientFilter, RecipeFilter
 from recipe_book.models import (Favorite, Ingredient, Recipe, ShoppingCart,
                                 Subscription, Tag)
@@ -24,6 +18,11 @@ from recipe_book.serializers import (FavoriteSerializer, IngredientSerializers,
                                      SubscriptionReadSerializer,
                                      SubscriptionWriteSerializer,
                                      TagSerializer)
+from rest_framework import mixins, permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import SAFE_METHODS
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 
 User = get_user_model()
 

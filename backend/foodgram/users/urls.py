@@ -1,5 +1,4 @@
 from django.urls import include, path
-
 from users.views import CustomAuthToken
 
 app_name = 'users'
