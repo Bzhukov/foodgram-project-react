@@ -29,7 +29,7 @@ def remove_ingredients(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('recipe_book', '0003_add_tags'),
+        ('recipe_book', '0002_add_tags'),
     ]
 
     operations = [
