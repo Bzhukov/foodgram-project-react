@@ -4,12 +4,12 @@ from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.shortcuts import get_object_or_404
-from recipe_book.models import (Favorite, Ingredient, Recipe, ShoppingCart,
-                                Structure, Subscription, Tag)
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 
 from foodgram.settings import MAX_INGREDIENT_AMOUNT, MIN_INGREDIENT_AMOUNT
+from recipe_book.models import (Favorite, Ingredient, Recipe, ShoppingCart,
+                                Structure, Subscription, Tag)
 
 User = get_user_model()
 
