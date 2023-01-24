@@ -8,6 +8,7 @@ from recipe_book.models import (Favorite, Ingredient, Recipe, ShoppingCart,
                                 Structure, Subscription, Tag)
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
+
 from foodgram.settings import MAX_INGREDIENT_AMOUNT, MIN_INGREDIENT_AMOUNT
 
 User = get_user_model()
