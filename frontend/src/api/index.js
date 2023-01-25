@@ -400,4 +400,4 @@ class Api {
   }
 }
 
-export default new Api('http://51.250.21.31', { 'content-type': 'application/json' })
+export default new Api('http://84.201.162.64/', { 'content-type': 'application/json' })
