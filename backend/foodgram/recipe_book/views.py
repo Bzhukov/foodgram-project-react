@@ -90,6 +90,9 @@ class SubscriptionsViewSet(mixins.CreateModelMixin,
     http_method_names = ['post', 'get', 'delete']
     pagination_class = LimitPageNumberPagination
 
+    def get_queryset(self):
+        return Subscription.objects.filters(user=self.request.user)
+
     @action(detail=True, methods=['post', 'delete'])
     def subscribe(self, request, pk=None):
         if request.method == 'DELETE':
@@ -117,13 +120,11 @@ class FavoriteViewSet(mixins.CreateModelMixin,
     Вьюсет Избранного
     Права доступа: Всем авторизованным.
     """
+    queryset = Favorite.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = FavoriteSerializer
     http_method_names = ['post', 'delete']
 
-    def get_queryset(self):
-        return Subscription.objects.select_related().filter(
-            user=self.request.user)
 
     @action(detail=True, methods=['post', 'delete'], )
     def favorite(self, request, pk=None):
