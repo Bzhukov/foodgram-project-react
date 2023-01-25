@@ -6,7 +6,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default=None)
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['51.250.30.50', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['84.201.162.64', '127.0.0.1', 'localhost']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -41,8 +41,8 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost',
     'http://127.0.0.1',
     'http://127.0.0.1:8000',
-    'http://51.250.30.50',
-    'http://51.250.30.50:8000',
+    'http://84.201.162.64',
+    'http://84.201.162.64:8000',
 ]
 ROOT_URLCONF = 'foodgram.urls'
 
