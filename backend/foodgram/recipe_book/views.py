@@ -117,7 +117,6 @@ class FavoriteViewSet(mixins.CreateModelMixin,
     Вьюсет Избранного
     Права доступа: Всем авторизованным.
     """
-    queryset = Favorite.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = FavoriteSerializer
     http_method_names = ['post', 'delete']
