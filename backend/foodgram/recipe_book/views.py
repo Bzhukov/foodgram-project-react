@@ -125,7 +125,6 @@ class FavoriteViewSet(mixins.CreateModelMixin,
     serializer_class = FavoriteSerializer
     http_method_names = ['post', 'delete']
 
-
     @action(detail=True, methods=['post', 'delete'], )
     def favorite(self, request, pk=None):
         if request.method == 'DELETE':
