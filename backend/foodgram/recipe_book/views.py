@@ -91,7 +91,8 @@ class SubscriptionsViewSet(mixins.CreateModelMixin,
     pagination_class = LimitPageNumberPagination
 
     def get_queryset(self):
-        return Subscription.objects.filters(user=self.request.user)
+        return Subscription.objects.select_related().filter(
+            user=self.request.user).all()
 
     @action(detail=True, methods=['post', 'delete'])
     def subscribe(self, request, pk=None):
