@@ -22,7 +22,7 @@ git clone git@github.com:Bzhukov/foodgram-project-react.git
    данными для подключения к бд:
 
 ```
-cd infra_sp2/infra
+cd infra/
 mv example.env .env
 nano example.env
 ```
