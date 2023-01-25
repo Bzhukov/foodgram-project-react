@@ -125,3 +125,17 @@ exit
 ```
 /api/redoc/
 ```
+
+# Пример развернутого проекта
+
+```
+http://51.250.21.31/
+```
+**Адрес и учетные данные админки:**
+```
+Логин: Admin
+email: Admin@mail.ru
+Пароль: Admin1234
+```
+
+<img src="https://github.com/Bzhukov/foodgram-project-react/actions/workflows/main.yml/badge.svg">
