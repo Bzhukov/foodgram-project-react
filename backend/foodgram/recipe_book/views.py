@@ -84,7 +84,6 @@ class SubscriptionsViewSet(mixins.CreateModelMixin,
     Вьюсет Подписок
     Права доступа: Всем авторизованным.
     """
-    queryset = Subscription.objects.all()
     serializer_class = SubscriptionReadSerializer
     permission_classes = (permissions.IsAuthenticated,)
     http_method_names = ['post', 'get', 'delete']
