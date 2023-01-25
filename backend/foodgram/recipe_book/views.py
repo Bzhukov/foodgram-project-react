@@ -123,9 +123,8 @@ class FavoriteViewSet(mixins.CreateModelMixin,
     http_method_names = ['post', 'delete']
 
     def get_queryset(self):
-        queryset = Subscription.objects.select_related().filter(
+        return Subscription.objects.select_related().filter(
             user=self.request.user)
-        return queryset
 
     @action(detail=True, methods=['post', 'delete'], )
     def favorite(self, request, pk=None):
