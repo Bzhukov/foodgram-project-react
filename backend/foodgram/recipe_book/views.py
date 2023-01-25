@@ -140,6 +140,17 @@ class FavoriteViewSet(mixins.CreateModelMixin,
         return Response(
             status=status.HTTP_400_BAD_REQUEST)
 
+    def list(self, request, *args, **kwargs):
+        queryset = Subscription.objects.select_related().filter(
+            user=request.user)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.serializer_class(queryset, many=True,
+                                           context={'request': request})
+        return Response(serializer.data)
+
 
 class ShoppingCartViewSet(viewsets.ModelViewSet):
     """
