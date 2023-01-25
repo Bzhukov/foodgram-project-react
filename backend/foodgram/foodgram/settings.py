@@ -116,6 +116,10 @@ REST_FRAMEWORK = {
 }
 
 DJOSER = {
+    'SERIALIZERS': {
+        'current_user': 'recipe_book.serializers.AuthorSerializer',
+        'user': 'recipe_book.serializers.AuthorSerializer'
+    },
     'PERMISSIONS': {
         'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
     }
